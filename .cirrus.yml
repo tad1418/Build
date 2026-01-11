@@ -1,5 +1,5 @@
 task:
-  name: PixelOS A52s Build (Ubuntu 24.04)
+  name: Project Infinity X QPR1 Build (Ubuntu 24.04)
   timeout_in: 8h
 
   container:
