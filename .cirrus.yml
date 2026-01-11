@@ -4,7 +4,7 @@ task:
 
   container:
     image: ubuntu:24.04
-    cpu: 32
+    cpu: 16
     memory: 64G
 
   env:
