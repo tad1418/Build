@@ -4,8 +4,8 @@ task:
 
   container:
     image: ubuntu:24.04
-    cpu: 16
-    memory: 64G
+    cpu: 12
+    memory: 32G
 
   env:
     TZ: Asia/Ho_Chi_Minh
