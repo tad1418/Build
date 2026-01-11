@@ -1,0 +1,70 @@
+task:
+  name: PixelOS A52s Build (Ubuntu 24.04)
+  timeout_in: 8h
+
+  container:
+    image: ubuntu:24.04
+    cpu: 32
+    memory: 64G
+
+  env:
+    TZ: Asia/Ho_Chi_Minh
+    DEBIAN_FRONTEND: noninteractive
+    USE_CCACHE: 1
+    CCACHE_EXEC: /usr/bin/ccache
+
+  script:
+    # ===============================
+    # Update system
+    # ===============================
+    - apt update
+    - apt upgrade -y
+
+    # ===============================
+    # Install dependencies
+    # ===============================
+    - apt install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev libgnutls28-dev lz4 libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+    - curl -o repo https://storage.googleapis.com/git-repo-downloads/repo
+    - chmod 0755 repo
+    - mv repo /usr/bin
+    # ===============================
+    # Setup ccache
+    # ===============================
+    - mkdir -p ~/.ccache
+    - ccache -M 25G
+    - ccache -s
+
+    # ===============================
+    # Init Android source
+    # ===============================
+    - mkdir -p ~/android
+    - cd ~/android
+    - git config --global user.name "anhdat1024"
+    - git config --global user.email "tadat1024@gmail.com"
+    - repo init --depth=1 --no-repo-verify --git-lfs -u https://github.com/ProjectInfinity-X/manifest -b 16 -g default,-mips,-darwin,-notdefault
+    - repo sync -c -no-clone-bundle --optimized-fetch --prune --force-sync --no-tags -j8
+    
+
+    # ===============================
+    # Clone device trees (CHANGE ME)
+    # ===============================
+    - git clone https://github.com/anhdat1024/infinity_device_samsung_a52sxq device/samsung/a52sxq
+    - git clone https://github.com/anhdat1024/infinity_device_samsung_sm7325-common device/samsung/sm7325-common
+    - git clone https://github.com/anhdat1024/android_vendor_samsung_a52sxq vendor/samsung/a52sxq
+    - git clone -b 16.0-a52sxq https://github.com/crdroidandroid/proprietary_vendor_samsung_sm7325-common vendor/samsung/sm7325-common
+    - git clone https://github.com/anhdat1024/android_kernel_samsung_sm7325 kernel/samsung/sm7325 --depth=1
+    - git clone https://github.com/LineageOS/android_hardware_samsung hardware/samsung
+    - git clone https://github.com/anhdat1024/android_hardware_dolby hardware/dolby
+    - git clone https://github.com/anhdat1024/hardware_samsung-extra_interfaces hardware/samsung-ext/interfaces
+    - git clone https://github.com/anhdat1024/android_vendor_bcr.git vendor/bcr
+    - git clone https://${GH_TOKEN}@github.com/ProjectInfinity-X/vendor_infinity-priv_keys vendor/infinity-priv/keys
+    # ===============================
+    # Build ROM
+    # ===============================
+    - source build/envsetup.sh
+    - lunch infinity_a52sxq-userdebug
+    - mka bacon
+
+  artifacts:
+    rom:
+      path: ~/android/out/target/product/a52sxq/*.zip
